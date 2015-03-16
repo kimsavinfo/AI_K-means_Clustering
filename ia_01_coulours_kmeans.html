@@ -1,0 +1,119 @@
+<!-- 
+Auteur : Kim SAVAROCHE
+Date : 16/10/2014
+Sujet : K Means
+Algorithm to find the main colours of an imported image
+
+Note : Canvas is needed so the pixel can be extracted one by one
+-->
+
+<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>IA 01 - Colours</title>
+		<link href="css/main.css" rel="stylesheet">
+
+		<script src="js/Lib_maths.js"></script>
+		<script src="js/Lib_canvas.js"></script>
+		<script src="js/k_means.js"></script>
+
+		<script type="text/javascript"> 
+		//<![CDATA[ 
+
+		var nbMainColourDefault = 3;
+
+		function init()
+		{
+			Lib_canvasDrawImageInCanvas('canvas', 'img_to_analyse');
+		}
+
+		function findMainColours()
+		{
+			// Clear previous main colours showed
+			clearElement("results");
+
+			// How many main colours does the user want ?
+			var nbMainColoursWanted = getNbMainColoursWanted();
+			// Get image's pixels
+			var imgPixels = Lib_canvasGetImagePixels('canvas');
+
+			// Find the image's main colours
+			var kmeans = new k_means(1);
+			var mainColours = kmeans.getMainColours(imgPixels, nbMainColoursWanted);
+
+			// Show the main colours that have been found
+			for (var iMainColour = 0; iMainColour < mainColours.length; iMainColour++) 
+			{
+				createDivColour(mainColours[iMainColour]);
+			}
+		}
+
+		function getNbMainColoursWanted()
+		{
+			var nbMainColoursWantedInput = document.getElementById('nbMainColoursWantedInput');
+			var nbMainColoursUser = nbMainColoursWantedInput.value;
+
+			if(nbMainColoursUser < 1)
+			{
+				nbMainColoursWantedInput.value = nbMainColourDefault;
+				nbMainColoursUser = nbMainColourDefault;
+			}
+
+			return nbMainColoursUser;
+		}
+
+		// Create a new div element with a colour in background
+		function createDivColour(colour)
+		{
+			var newDiv = document.createElement("div"); 
+			var hexColour = Lib_canvasRGBToHex(colour)
+			var txtColour = "black";
+			if(colour[0] < 75  && colour[1] < 75  && colour[2] < 75 )
+			{
+				txtColour = "white";
+			}
+
+			newDiv.className = "mainColour";
+			newDiv.innerHTML = hexColour;
+			newDiv.style.color = txtColour;
+			newDiv.style.height = '50px';
+			newDiv.style.background = hexColour; 
+
+			document.getElementById("results").appendChild(newDiv);
+		}
+
+		function clearElement(elementID)
+		{
+			var div = document.getElementById(elementID);
+			while(div.firstChild)
+			{
+				div.removeChild(div.firstChild);
+			}
+		}
+		
+		//]]> 
+		</script> 
+	</head>
+	<body onload="init();">
+		<h1>
+			Find the main colours of your picture :
+		</h1>
+
+		<p>
+			<button onclick="findMainColours()">Find</button>
+			<input type="text" id="nbMainColoursWantedInput" value="3">
+			main colours
+		<p>
+			<img src="imgs/frank_lloyd_falling_water.jpg" alt="User Image" id="img_to_analyse">
+		</p>
+
+		<div id="results"></div>
+
+		<!-- The canvas will welcome the user image -->
+		<canvas id="canvas" style="display: none;"></canvas>
+		
+	</body>
+</html>
